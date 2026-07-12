@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 import NewSessionForm from "@/components/NewSessionForm";
 import { getSessionsAsync, getPlayerSummariesAsync } from "@/lib/data";
 

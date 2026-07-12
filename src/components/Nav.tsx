@@ -81,7 +81,7 @@ export default function Nav() {
 
           {/* Sheets link — pushed to the right */}
           <a
-            href="https://google.com"
+            href={process.env.NEXT_PUBLIC_SHEET_URL ?? "https://docs.google.com"}
             target="_blank"
             rel="noopener noreferrer"
             className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 shrink-0"
@@ -128,7 +128,7 @@ export default function Nav() {
           </span>
         </Link>
         <a
-          href="https://google.com"
+          href={process.env.NEXT_PUBLIC_SHEET_URL ?? "https://docs.google.com"}
           target="_blank"
           rel="noopener noreferrer"
           className="ml-auto flex items-center justify-center w-8 h-8 rounded-lg transition-all"
