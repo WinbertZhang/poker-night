@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+/* =========================================================
+   Design Tokens
+   ========================================================= */
+:root {
+  /* Backgrounds */
+  --background: #050506;
+  --bg-deep:    #020203;
+  --bg-raised:  #0d0d10;
+
+  /* Surfaces — translucent glass layers */
+  --surface:       rgba(255, 255, 255, 0.05);
+  --surface-2:     rgba(255, 255, 255, 0.08);
+  --surface-glass: linear-gradient(160deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%);
+
+  /* Borders */
+  --border:        rgba(255, 255, 255, 0.07);
+  --border-bright: rgba(255, 255, 255, 0.13);
+  --border-accent: rgba(94, 106, 210, 0.35);
+
+  /* Text */
+  --foreground: #ededef;
+  --muted:      #8a8f98;
+  --subtle:     rgba(255, 255, 255, 0.30);
+
+  /* Accent — Linear indigo */
+  --accent-blue:      #5e6ad2;
+  --accent-blue-dim:  rgba(94, 106, 210, 0.15);
+  --accent-glow:      rgba(94, 106, 210, 0.30);
+
+  /* Semantic */
+  --accent-green:  #22c55e;
+  --green-glow:    rgba(34, 197, 94, 0.25);
+  --accent-red:    #ef4444;
+  --red-glow:      rgba(239, 68, 68, 0.25);
+  --accent-yellow: #f59e0b;
+
+  /* Multi-layer card shadows */
+  --shadow-card:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 4px 24px rgba(0,0,0,0.55),
+    0 1px 2px  rgba(0,0,0,0.35);
+
+  --shadow-card-hover:
+    0 0 0 1px rgba(255,255,255,0.12),
+    0 8px 40px rgba(0,0,0,0.65),
+    0 0 60px  rgba(94,106,210,0.09);
+
+  --shadow-accent:
+    0 0 0 1px rgba(94,106,210,0.45),
+    0 4px 16px rgba(94,106,210,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* =========================================================
+   Tailwind theme bridge
+   ========================================================= */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent:     var(--accent-blue);
+  --font-sans:        var(--font-geist-sans);
+  --font-mono:        var(--font-geist-mono);
+}
+
+/* =========================================================
+   Base
+   ========================================================= */
+html {
+  background: var(--background);
+  background-image: radial-gradient(ellipse 140% 60% at 50% 0%, #0d0d1a 0%, #050506 55%, #020203 100%);
+  min-height: 100%;
+}
+
+body {
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: transparent;
+}
+
+* { box-sizing: border-box; }
+
+/* Custom scrollbar — blends into the dark surface */
+::-webkit-scrollbar               { width: 4px; height: 4px; }
+::-webkit-scrollbar-track         { background: transparent; }
+::-webkit-scrollbar-thumb         { background: rgba(255,255,255,0.10); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover   { background: rgba(255,255,255,0.18); }
+::-webkit-scrollbar-corner        { background: transparent; }
+* { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.10) transparent; }
+
+::selection {
+  background: rgba(94, 106, 210, 0.35);
+  color: #fff;
+}
+
+::-webkit-scrollbar              { width: 5px; height: 5px; }
+::-webkit-scrollbar-track        { background: transparent; }
+::-webkit-scrollbar-thumb        { background: rgba(255,255,255,0.09); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover  { background: rgba(255,255,255,0.16); }
+
+/* =========================================================
+   Reusable component classes
+   ========================================================= */
+@layer components {
+
+  /* Glass card — the core surface primitive */
+  .card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+    transition: border-color 200ms ease, box-shadow 250ms ease;
+  }
+
+  .card-interactive:hover {
+    border-color: var(--border-bright);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* Mono uppercase label */
+  .tag {
+    font-family: var(--font-geist-mono), monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Gradient text treatments */
+  .text-gradient {
+    background: linear-gradient(180deg, #ffffff 20%, rgba(255,255,255,0.6) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-accent {
+    background: linear-gradient(135deg, #818cf8 0%, #6872d9 40%, #5e6ad2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Win / Loss glow values */
+  .val-win {
+    color: var(--accent-green);
+    text-shadow: 0 0 16px var(--green-glow);
+  }
+
+  .val-loss {
+    color: var(--accent-red);
+    text-shadow: 0 0 16px var(--red-glow);
+  }
+
+  .val-neutral {
+    color: var(--muted);
+  }
+
+  /* Hairline section divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border) 30%, var(--border) 70%, transparent);
+  }
+}
+
+/* =========================================================
+   Keyframe animations
+   ========================================================= */
+@keyframes float-a {
+  0%, 100% { transform: translateY(0px)   rotate(0deg); }
+  33%       { transform: translateY(-20px) rotate(0.6deg); }
+  66%       { transform: translateY(-8px)  rotate(-0.4deg); }
+}
+
+@keyframes float-b {
+  0%, 100% { transform: translateY(0px)   rotate(0deg); }
+  50%       { transform: translateY(-28px) rotate(1deg); }
+}
+
+@keyframes float-c {
+  0%, 100% { transform: translateY(0px)   scale(1); }
+  40%       { transform: translateY(-14px) scale(1.03); }
+  80%       { transform: translateY(-22px) scale(0.98); }
+}
+
+@keyframes pulse-ambient {
+  0%, 100% { opacity: 0.10; }
+  50%       { opacity: 0.22; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
