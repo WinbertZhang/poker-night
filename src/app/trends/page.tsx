@@ -1,5 +1,4 @@
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 import { getPlayerTrendsAsync } from "@/lib/data";
 import TrendChart from "@/components/TrendChart";
 

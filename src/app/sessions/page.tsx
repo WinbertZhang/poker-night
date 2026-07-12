@@ -1,5 +1,4 @@
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 import { getSessionsAsync } from "@/lib/data";
 import SessionsExplorer from "@/components/SessionsExplorer";
 

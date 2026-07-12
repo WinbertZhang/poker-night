@@ -1,5 +1,4 @@
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 import { getPlayerSummariesAsync } from "@/lib/data";
 import StatsTable from "@/components/StatsTable";
 

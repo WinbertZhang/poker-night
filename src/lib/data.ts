@@ -7,7 +7,6 @@ const DATA_DIR = path.join(process.cwd(), "data");
 // Local dev always falls back to app/data/ (fake seed data) so you never
 // need credentials to iterate, and real data stays in the archive.
 const USE_SHEETS = !!(
-  (process.env.NODE_ENV === "production" || process.env.FORCE_SHEETS === "true") &&
   process.env.GOOGLE_SHEET_ID &&
   process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
   process.env.GOOGLE_PRIVATE_KEY

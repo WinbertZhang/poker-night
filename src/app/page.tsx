@@ -1,5 +1,4 @@
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 import { getSessionsAsync, getHomepageStatsAsync } from "@/lib/data";
 import SessionCard from "@/components/SessionCard";
 import HomeStats from "@/components/HomeStats";

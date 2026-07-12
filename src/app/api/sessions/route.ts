@@ -17,7 +17,6 @@ interface SessionPayload {
 }
 
 const USE_SHEETS = !!(
-  (process.env.NODE_ENV === "production" || process.env.FORCE_SHEETS === "true") &&
   process.env.GOOGLE_SHEET_ID &&
   process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
   process.env.GOOGLE_PRIVATE_KEY
