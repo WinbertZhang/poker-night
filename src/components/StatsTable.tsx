@@ -234,7 +234,7 @@ export default function StatsTable({ summaries }: { summaries: PlayerSummary[] }
       </div>
 
       {/* Mobile card list */}
-      <div className="sm:hidden divide-y" style={{ borderColor: "var(--border)" }}>
+      <div className="sm:hidden">
         {sorted.map((s) => {
           const win = s.net >= 0;
           return (

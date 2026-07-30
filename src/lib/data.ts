@@ -227,7 +227,6 @@ function buildHomepageStats(sessions: Session[], summaries: PlayerSummary[]): Ho
   const regulars = new Set(summaries.filter((s) => s.sessions >= 5).map((s) => s.player));
 
   const leaderboard = summaries
-    .filter((s) => regulars.has(s.player))
     .slice(0, 5)
     .map((s) => ({
       player: s.player,

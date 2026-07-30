@@ -30,11 +30,20 @@ interface Props {
 }
 
 // Determine "active" players: those who played in the most recent session
-function getDefaultSelected(trends: PlayerTrend[], allPlayers: string[]): Set<string> {
-  if (!trends.length) return new Set(allPlayers.slice(0, 8));
+function getDefaultSelected(
+  trends: PlayerTrend[],
+  allPlayers: string[],
+  sessionCounts: Record<string, number>
+): Set<string> {
+  // Prefer players with >=5 sessions (regulars)
+  const regulars = allPlayers.filter((p) => (sessionCounts[p] ?? 0) >= 5);
+  if (!trends.length) return new Set(regulars.length ? regulars.slice(0, 8) : allPlayers.slice(0, 8));
   const last = trends[trends.length - 1];
-  const active = allPlayers.filter((p) => last[p] !== undefined && last[p] !== 0);
-  return new Set(active.length > 0 ? active : allPlayers.slice(0, 8));
+  const active = (regulars.length ? regulars : allPlayers).filter(
+    (p) => last[p] !== undefined && last[p] !== 0
+  );
+  const base = active.length > 0 ? active : regulars.length ? regulars.slice(0, 8) : allPlayers.slice(0, 8);
+  return new Set(base);
 }
 
 interface TooltipPayload {
@@ -86,7 +95,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 export default function TrendChart({ trends, allPlayers, sessionCounts }: Props) {
   const [selected, setSelected] = useState<Set<string>>(
-    () => getDefaultSelected(trends, allPlayers)
+    () => getDefaultSelected(trends, allPlayers, sessionCounts)
   );
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"alpha" | "freq">("freq");
