@@ -1,6 +1,7 @@
 "use client";
 
 import type { HomepageStats, Session } from "@/lib/types";
+import type { ReactNode } from "react";
 import Link from "next/link";
 
 function formatDate(d: string) {
@@ -19,10 +20,10 @@ function StatTile({
 }: {
   label: string;
   value: string;
-  sub?: string;
+  sub?: ReactNode;
   valueClass?: string;
 }) {
-  return (
+  const content = (
     <div className="card p-5 flex flex-col justify-between min-h-[110px]">
       <p className="tag mb-3">{label}</p>
       <div>
@@ -37,6 +38,7 @@ function StatTile({
       </div>
     </div>
   );
+  return content;
 }
 
 interface Props {
@@ -60,6 +62,7 @@ export default function HomeStats({ stats, recentSessions }: Props) {
     {
       label: "Current Leader",
       name: currentLeader.player.split(" ")[0],
+      player: currentLeader.player,
       value: `${currentLeader.net >= 0 ? "+" : ""}$${currentLeader.net.toFixed(2)}`,
       valueClass: currentLeader.net >= 0 ? "val-win" : "val-loss",
       icon: "👑",
@@ -67,6 +70,7 @@ export default function HomeStats({ stats, recentSessions }: Props) {
     {
       label: "Shark",
       name: shark.player.split(" ")[0],
+      player: shark.player,
       value: `${shark.winRate}% win rate`,
       valueClass: "val-win",
       icon: "🦈",
@@ -74,6 +78,7 @@ export default function HomeStats({ stats, recentSessions }: Props) {
     {
       label: "Last Session King",
       name: lastSessionKing.player.split(" ")[0],
+      player: lastSessionKing.player,
       value: `+$${lastSessionKing.net.toFixed(2)}`,
       valueClass: "val-win",
       icon: "🎯",
@@ -81,6 +86,7 @@ export default function HomeStats({ stats, recentSessions }: Props) {
     {
       label: "On a Heater",
       name: onAHeater.player.split(" ")[0],
+      player: onAHeater.player,
       value: `${onAHeater.net >= 0 ? "+" : ""}$${onAHeater.net.toFixed(2)} last 5`,
       valueClass: onAHeater.net >= 0 ? "val-win" : "val-loss",
       icon: "🔥",
@@ -131,13 +137,13 @@ export default function HomeStats({ stats, recentSessions }: Props) {
         <StatTile
           label="Biggest Win"
           value={`+$${biggestWin.amount.toFixed(0)}`}
-          sub={`${biggestWin.player.split(" ")[0]} · ${formatDate(biggestWin.date)}`}
+          sub={biggestWin.date ? `${biggestWin.player.split(" ")[0]} - ${formatDate(biggestWin.date)}` : "No results yet"}
           valueClass="val-win"
         />
         <StatTile
           label="Biggest Loss"
           value={`-$${Math.abs(biggestLoss.amount).toFixed(0)}`}
-          sub={`${biggestLoss.player.split(" ")[0]} · ${formatDate(biggestLoss.date)}`}
+          sub={biggestLoss.date ? `${biggestLoss.player.split(" ")[0]} - ${formatDate(biggestLoss.date)}` : "No results yet"}
           valueClass="val-loss"
         />
       </div>

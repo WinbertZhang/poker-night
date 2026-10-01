@@ -5,6 +5,7 @@ import type { Session, SessionRow, PlayerSummary, PlayerTrend, HomepageStats } f
 import { GAMES, type Game } from "./games";
 import { getSelectedGame } from "./selected-game";
 import Papa from "papaparse";
+import { summarizePlayers as computePlayerSummaries } from "./player-profile";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 // Use Sheets only when credentials are present AND we're not in local dev.
@@ -66,43 +67,6 @@ function toSessionRow(r: string[], game: Game = "0.1-0.2"): SessionRow {
 }
 
 // ─── Derive player summaries from session rows ────────────────────────────────
-
-function computePlayerSummaries(sessions: Session[]): PlayerSummary[] {
-  const acc: Record<string, {
-    venmoBuyIn: number;
-    net: number;
-    totalCashOut: number;
-    sessions: number;
-  }> = {};
-
-  for (const sess of sessions) {
-    for (const p of sess.players) {
-      if (!acc[p.player]) acc[p.player] = { venmoBuyIn: 0, net: 0, totalCashOut: 0, sessions: 0 };
-      acc[p.player].venmoBuyIn += p.buyIn;
-      acc[p.player].net += p.net;
-      acc[p.player].totalCashOut += p.cashOut;
-      acc[p.player].sessions += 1;
-    }
-  }
-
-  return Object.entries(acc)
-    .map(([player, d]) => {
-      const net = d.net;
-      const avgNetPerSession = d.sessions > 0 ? net / d.sessions : 0;
-      return {
-        player,
-        sessions: d.sessions,
-        venmoBuyIn: d.venmoBuyIn,
-        offVenmoBuyIn: 0,
-        totalBuyIn: d.venmoBuyIn,
-        totalCashOut: d.totalCashOut,
-        net,
-        avgNetPerSession,
-        note: "",
-      };
-    })
-    .sort((a, b) => b.net - a.net);
-}
 
 // ─── Group session rows into Session objects ──────────────────────────────────
 

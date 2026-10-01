@@ -161,7 +161,7 @@ export default function TrendChart({ trends, allPlayers, sessionCounts }: Props)
             <Tooltip content={<CustomTooltip />} />
             {allPlayers
               .filter((p) => selected.has(p))
-              .map((player, i) => (
+              .map((player) => (
                 <Line
                   key={player}
                   type="monotone"
@@ -253,28 +253,10 @@ export default function TrendChart({ trends, allPlayers, sessionCounts }: Props)
             const on = selected.has(player);
             const color = colorFor(allPlayers.indexOf(player));
             return (
-              <button
-                key={player}
-                onClick={() => toggle(player)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150"
-                style={{
-                  background: on ? `${color}20` : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${on ? color + "66" : "var(--border)"}`,
-                  color: on ? color : "var(--muted)",
-                  boxShadow: on ? `0 0 12px ${color}22` : "none",
-                }}
-              >
-                <span
-                  className="w-2 h-2 rounded-full"
-                  style={{ background: on ? color : "var(--border)" }}
-                />
+              <button key={player} type="button" onClick={() => toggle(player)} aria-pressed={on} className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium" style={{ background: on ? `${color}20` : "rgba(255,255,255,0.03)", border: `1px solid ${on ? color + "66" : "var(--border)"}`, color: on ? color : "var(--muted)" }}>
+                <span className="w-2 h-2 rounded-full" style={{ background: on ? color : "var(--border)" }} />
                 {player.split(" ")[0]}
-                <span
-                  className="text-[10px] font-mono"
-                  style={{ opacity: 0.55 }}
-                >
-                  {sessionCounts[player] ?? 0}
-                </span>
+                <span className="text-[10px] font-mono" style={{ opacity: 0.55 }}>{sessionCounts[player] ?? 0}</span>
               </button>
             );
           })}

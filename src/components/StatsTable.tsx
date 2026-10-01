@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import PlayerProfileLink from "@/components/PlayerProfileLink";
 import type { PlayerSummary } from "@/lib/types";
 
 type SortKey = keyof PlayerSummary;
@@ -40,15 +41,15 @@ export default function StatsTable({ summaries }: { summaries: PlayerSummary[] }
       : String(av).localeCompare(String(bv));
   });
 
-  const maxNet = Math.max(...summaries.map((s) => Math.abs(s.net)));
-  const maxAvg = Math.max(...summaries.map((s) => Math.abs(s.avgNetPerSession)));
+  const maxNet = Math.max(0, ...summaries.map((s) => Math.abs(s.net)));
+  const maxAvg = Math.max(0, ...summaries.map((s) => Math.abs(s.avgNetPerSession)));
 
   function handleSort(key: SortKey) {
     if (key === sortKey) setSortDir((d) => (d === "desc" ? "asc" : "desc"));
     else { setSortKey(key); setSortDir("desc"); }
   }
 
-  const SortIndicator = ({ k }: { k: SortKey }) =>
+  const renderSortIndicator = ({ k }: { k: SortKey }) =>
     sortKey === k ? (
       <span style={{ color: "var(--accent-blue)", marginLeft: 4 }}>
         {sortDir === "desc" ? "↓" : "↑"}
@@ -57,7 +58,7 @@ export default function StatsTable({ summaries }: { summaries: PlayerSummary[] }
       <span style={{ color: "rgba(255,255,255,0.15)", marginLeft: 4 }}>↕</span>
     );
 
-  const Th = ({
+  const renderHeader = ({
     label,
     k,
     align = "right",
@@ -67,12 +68,12 @@ export default function StatsTable({ summaries }: { summaries: PlayerSummary[] }
     align?: "left" | "right";
   }) => (
     <th
-      onClick={() => handleSort(k)}
-      className={`px-4 py-3 tag cursor-pointer select-none text-${align}`}
+      scope="col"
+      aria-sort={sortKey === k ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+      className={`px-4 py-3 tag select-none ${align === "left" ? "text-left" : "text-right"}`}
       style={{ whiteSpace: "nowrap", letterSpacing: "0.1em" }}
     >
-      {label}
-      <SortIndicator k={k} />
+      <button type="button" className="cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-offset-4" onClick={() => handleSort(k)}>{label}{renderSortIndicator({ k })}</button>
     </th>
   );
 
@@ -83,7 +84,7 @@ export default function StatsTable({ summaries }: { summaries: PlayerSummary[] }
         className="px-4 sm:px-6 py-5 flex gap-3 flex-wrap"
         style={{ borderBottom: "1px solid var(--border)" }}
       >
-        {sorted.slice(0, 3).map((s, i) => {
+        {[...summaries].sort((a, b) => b.net - a.net).slice(0, 3).map((s, i) => {
           const medals = ["🥇", "🥈", "🥉"];
           const win = s.net >= 0;
           return (
@@ -143,23 +144,24 @@ export default function StatsTable({ summaries }: { summaries: PlayerSummary[] }
 
       {/* Desktop table */}
       <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" style={{ width: "100%" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid var(--border)" }}>
-              <Th label="Player" k="player" align="left" />
-              <Th label="Sessions" k="sessions" />
-              <Th label="Buy-in" k="totalBuyIn" />
-              <Th label="Cash-out" k="totalCashOut" />
-              <Th label="Net" k="net" />
-              <Th label="Avg/Sess" k="avgNetPerSession" />
+              {renderHeader({ label: "Player", k: "player", align: "left" })}
+              {renderHeader({ label: "Sessions", k: "sessions" })}
+              {renderHeader({ label: "Buy-in", k: "totalBuyIn" })}
+              {renderHeader({ label: "Cash-out", k: "totalCashOut" })}
+              {renderHeader({ label: "Net", k: "net" })}
+              {renderHeader({ label: "Avg/Sess", k: "avgNetPerSession" })}
             </tr>
           </thead>
           <tbody>
             {sorted.map((s, idx) => {
               const win = s.net >= 0;
               return (
-                <tr
+                <PlayerProfileLink as="row" player={s.player}
                   key={s.player}
+                  className=""
                   style={{
                     borderBottom: "1px solid var(--border)",
                     background:
@@ -214,7 +216,7 @@ export default function StatsTable({ summaries }: { summaries: PlayerSummary[] }
                           s.avgNetPerSession >= 0 ? "val-win" : "val-loss"
                         }`}
                       >
-                        {s.avgNetPerSession >= 0 ? "+" : ""}$
+                        {s.avgNetPerSession >= 0 ? "+" : "-"}$
                         {Math.abs(s.avgNetPerSession).toFixed(2)}
                       </span>
                       <div className="w-24">
@@ -226,19 +228,20 @@ export default function StatsTable({ summaries }: { summaries: PlayerSummary[] }
                       </div>
                     </div>
                   </td>
-                </tr>
+                </PlayerProfileLink>
               );
             })}
           </tbody>
         </table>
       </div>
 
+      {!summaries.length && <p className="p-6 text-sm text-center" style={{ color: "var(--muted)" }}>No player stats recorded for this game yet.</p>}
       {/* Mobile card list */}
       <div className="sm:hidden">
         {sorted.map((s) => {
           const win = s.net >= 0;
           return (
-            <div key={s.player} className="px-4 py-4">
+            <PlayerProfileLink player={s.player} key={s.player} className="w-full px-4 py-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div
@@ -265,13 +268,13 @@ export default function StatsTable({ summaries }: { summaries: PlayerSummary[] }
                     {win ? "+" : ""}${s.net.toFixed(2)}
                   </p>
                   <p className="text-xs font-mono" style={{ color: "var(--muted)" }}>
-                    avg {s.avgNetPerSession >= 0 ? "+" : ""}$
-                    {s.avgNetPerSession.toFixed(2)}/sess
+                    avg {s.avgNetPerSession >= 0 ? "+" : "-"}$
+                    {Math.abs(s.avgNetPerSession).toFixed(2)}/sess
                   </p>
                 </div>
               </div>
               <NetBar value={s.net} max={maxNet} win={win} />
-            </div>
+            </PlayerProfileLink>
           );
         })}
       </div>

@@ -51,7 +51,7 @@ export default function Nav({ game }: { game: Game }) {
 
           <div className="flex items-center gap-0.5 ml-2">
             {links.map(({ href, fullLabel }) => {
-              const active = pathname === href;
+              const active = (pathname === href || (href === "/stats" && pathname.startsWith("/stats/")));
               const isNew = href === "/new-session";
               return (
                 <Link
@@ -156,7 +156,7 @@ export default function Nav({ game }: { game: Game }) {
         }}
       >
         {links.map(({ href, label, icon }) => {
-          const active = pathname === href;
+          const active = (pathname === href || (href === "/stats" && pathname.startsWith("/stats/")));
           return (
             <Link
               key={href}

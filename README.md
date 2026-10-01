@@ -200,3 +200,14 @@ New Session writes to the selected game's tab using its column format.
 
 Without Sheets credentials, the new game uses `data/sessions-1-3.csv` if
 present, otherwise the example row above. CSV files remain locally ignored.
+
+## Player profiles
+
+Click anywhere in a player's box on All Sessions or a Player Stats row to open their individual
+profile under `/stats/[player]`. Profiles show session count, total buy-ins,
+cash-outs, net, average net, winning session rate, and every session result
+(newest first). The game toggle filters the profile to the selected blinds.
+Multiple entries for a player on the same session date are combined into
+one session result. `PlayerProfileLink` makes the entire player container clickable, using native links for session boxes
+and mobile stats cards, and keyboard-accessible table rows on Player Stats.
+URL-encoded names are decoded before displaying and looking up results.

@@ -50,7 +50,7 @@ export default function RecentSessionsList({ sessions }: { sessions: Session[] }
               {/* Desktop: extra player chips */}
               <div className="hidden md:flex items-center gap-4">
                 {sess.players.slice(0, 4).map((p) => (
-                  <span
+                  <div
                     key={p.player}
                     className="text-xs font-mono"
                     style={{
@@ -64,7 +64,7 @@ export default function RecentSessionsList({ sessions }: { sessions: Session[] }
                   >
                     {p.player.split(" ")[0]}{" "}
                     {(p.net >= 0 ? "+" : "") + p.net.toFixed(0)}
-                  </span>
+                  </div>
                 ))}
               </div>
             </div>

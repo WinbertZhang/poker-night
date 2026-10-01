@@ -77,6 +77,7 @@ export async function POST(req: NextRequest) {
   revalidatePath("/sessions");
   revalidatePath("/trends");
   revalidatePath("/stats");
+  revalidatePath("/stats/[player]", "page");
 
   return NextResponse.json({ ok: true, rows: rows.length });
 }

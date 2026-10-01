@@ -1,8 +1,10 @@
 export const dynamic = "force-dynamic";
 import { getPlayerTrendsAsync } from "@/lib/data";
+import { getSelectedGame } from "@/lib/selected-game";
 import TrendChart from "@/components/TrendChart";
 
 export default async function TrendsPage() {
+  const game = await getSelectedGame();
   const { trends, players, sessionCounts } = await getPlayerTrendsAsync();
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
@@ -14,7 +16,7 @@ export default async function TrendsPage() {
           Cumulative net across all sessions. Select players to compare.
         </p>
       </div>
-      <TrendChart trends={trends} allPlayers={players} sessionCounts={sessionCounts} />
+      <TrendChart key={game} trends={trends} allPlayers={players} sessionCounts={sessionCounts} />
     </div>
   );
 }

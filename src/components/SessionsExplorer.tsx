@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import PlayerProfileLink from "@/components/PlayerProfileLink";
 import type { Session } from "@/lib/types";
 
 function netClass(n: number) {
@@ -117,42 +118,23 @@ export default function SessionsExplorer({ sessions }: Props) {
               return (
                 <button
                   key={s.date}
+                  type="button"
                   onClick={() => selectSession(s.date)}
-                  className="w-full text-left px-4 py-3 transition-all duration-150"
+                  aria-pressed={isActive}
+                  className="w-full text-left px-4 py-3 transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
                   style={{
-                    background: isActive ? "rgba(94,106,210,0.12)" : "transparent",
-                    borderLeft: isActive
-                      ? "2px solid var(--accent-blue)"
-                      : "2px solid transparent",
+                    background: isActive ? "rgba(94,106,210,0.12)" : undefined,
+                    borderLeft: isActive ? "2px solid var(--accent-blue)" : "2px solid transparent",
                     borderBottom: "1px solid var(--border)",
                   }}
-                  onMouseEnter={(e) => {
-                    if (!isActive)
-                      e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.background = "transparent";
-                  }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="text-sm font-medium"
-                      style={{ color: isActive ? "#c7caff" : "var(--foreground)" }}
-                    >
-                      {new Date(s.date + "T12:00:00").toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
+                  <span className="flex items-center justify-between">
+                    <span className="text-sm font-medium" style={{ color: isActive ? "#c7caff" : "var(--foreground)" }}>
+                      {new Date(s.date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                     </span>
-                    <span className="tag" style={{ letterSpacing: "0.06em" }}>
-                      {s.players.length}p
-                    </span>
-                  </div>
-                  {winner && (
-                    <p className="text-xs mt-0.5 font-mono truncate val-win">
-                      {winner.player.split(" ")[0]} +${winner.net.toFixed(0)}
-                    </p>
-                  )}
+                    <span className="tag">{s.players.length}p</span>
+                  </span>
+                  {winner && <span className="block text-xs mt-0.5 font-mono truncate val-win">{winner.player.split(" ")[0]} +${winner.net.toFixed(0)}</span>}
                 </button>
               );
             })}
@@ -230,7 +212,7 @@ function SessionDetail({ session }: { session: Session }) {
         {/* Chips */}
         <div className="flex flex-wrap gap-2 mt-4">
           {winner && (
-            <div
+            <PlayerProfileLink player={winner.player}
               className="px-3 py-1.5 rounded-lg text-xs font-mono"
               style={{
                 background: "rgba(34,197,94,0.08)",
@@ -241,10 +223,10 @@ function SessionDetail({ session }: { session: Session }) {
               <span className="font-semibold val-win">
                 {winner.player.split(" ")[0]} +${winner.net.toFixed(2)}
               </span>
-            </div>
+            </PlayerProfileLink>
           )}
           {loser && (
-            <div
+            <PlayerProfileLink player={loser.player}
               className="px-3 py-1.5 rounded-lg text-xs font-mono"
               style={{
                 background: "rgba(239,68,68,0.08)",
@@ -255,7 +237,7 @@ function SessionDetail({ session }: { session: Session }) {
               <span className="font-semibold val-loss">
                 {loser.player.split(" ")[0]} {loser.net.toFixed(2)}
               </span>
-            </div>
+            </PlayerProfileLink>
           )}
           <div
             className="px-3 py-1.5 rounded-lg text-xs font-mono"
@@ -285,9 +267,9 @@ function SessionDetail({ session }: { session: Session }) {
           const barPct =
             maxAbsNet === 0 ? 0 : (Math.abs(p.net) / maxAbsNet) * 100;
           return (
-            <div
+            <PlayerProfileLink player={p.player}
               key={p.player}
-              className="px-5 sm:px-6 py-4"
+              className="w-full px-5 sm:px-6 py-4"
               style={{
                 borderBottom:
                   i < session.players.length - 1
@@ -341,7 +323,7 @@ function SessionDetail({ session }: { session: Session }) {
                   }}
                 />
               </div>
-            </div>
+            </PlayerProfileLink>
           );
         })}
       </div>
