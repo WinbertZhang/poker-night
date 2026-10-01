@@ -21,5 +21,7 @@ export default function PlayerProfileLink({ player, children, className = "", st
     } : undefined}>{children}</tr>;
   if (!available) return <div className={className} style={style}>{children}</div>;
   return <Link href={`/stats/${encodeURIComponent(player)}`} className={`${className} player-profile-link`}
-    style={{ ...style, display: "block" }} aria-label={`View ${player}'s profile`}>{children}</Link>;
+    style={{ ...style, display: "block" }} aria-label={`View ${player}'s profile`}>
+    {children}
+  </Link>;
 }
