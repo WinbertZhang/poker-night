@@ -2,6 +2,10 @@ import fs from "fs";
 import path from "path";
 import type { Session, SessionRow, PlayerSummary, PlayerTrend, HomepageStats } from "./types";
 
+import { GAMES, type Game } from "./games";
+import { getSelectedGame } from "./selected-game";
+import Papa from "papaparse";
+
 const DATA_DIR = path.join(process.cwd(), "data");
 // Use Sheets only when credentials are present AND we're not in local dev.
 // Local dev always falls back to app/data/ (fake seed data) so you never
@@ -14,52 +18,50 @@ const USE_SHEETS = !!(
 
 // ─── CSV helpers ──────────────────────────────────────────────────────────────
 
-function parseCSV(raw: string): string[][] {
-  return raw
-    .split("\n")
-    .map((line) => {
-      const cells: string[] = [];
-      let inside = false;
-      let cur = "";
-      for (const ch of line) {
-        if (ch === '"') { inside = !inside; }
-        else if (ch === "," && !inside) { cells.push(cur); cur = ""; }
-        else { cur += ch; }
-      }
-      cells.push(cur);
-      return cells;
-    })
-    .filter((r) => r.length > 1);
-}
-
-function csvSessionRows(): string[][] {
-  const raw = fs.readFileSync(path.join(DATA_DIR, "sessions.csv"), "utf8");
-  const [, ...rows] = parseCSV(raw);
-  return rows.filter((r) => r.length >= 9 && r[0]);
+function csvSessionRows(game: Game): string[][] {
+  const file = path.join(DATA_DIR, GAMES[game].file);
+  if (game === "1-3" && !fs.existsSync(file)) {
+    return [["9/30/2026", "Allen Mons", "$300.00", "$337.00", "$37.00"]];
+  }
+  const raw = fs.readFileSync(file, "utf8");
+  return Papa.parse<string[]>(raw, { skipEmptyLines: true }).data.slice(1)
+    .filter((r) => r[0]?.trim() && r.length >= (game === "1-3" ? 5 : 9));
 }
 
 // ─── Sheets helpers ───────────────────────────────────────────────────────────
 
-async function sheetsSessionRows(): Promise<string[][]> {
+async function sheetsSessionRows(game: Game): Promise<string[][]> {
   const { readSheet } = await import("./sheets");
-  const rows = await readSheet("sessions!A:J");
-  return rows.slice(1).filter((r) => r.length >= 9 && r[0]);
+  const rows = await readSheet(game === "1-3" ? "'1/3 sessions'!A:E" : "sessions!A:J");
+  return rows.slice(1).filter((r) => r.length >= (game === "1-3" ? 5 : 9) && r[0]);
 }
 
 // ─── Row → typed objects ──────────────────────────────────────────────────────
 
-function toSessionRow(r: string[]): SessionRow {
+function money(value: string | undefined): number {
+  return Number((value ?? "").replace(/[$,+\s]/g, "")) || 0;
+}
+
+function normalizeDate(value: string): string {
+  const trimmed = value.trim();
+  const match = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  return match ? `${match[3]}-${match[1].padStart(2, "0")}-${match[2].padStart(2, "0")}` : trimmed;
+}
+
+function toSessionRow(r: string[], game: Game = "0.1-0.2"): SessionRow {
+  const simple = game === "1-3";
+  const buyIn = money(r[simple ? 2 : 3]);
+  const cashOut = money(r[simple ? 3 : 4]);
   return {
-    sessionDate: r[0].trim(),
-    firstBuyIn: r[1].trim(),
-    player: r[2].trim(),
-    buyIn: parseFloat(r[3]) || 0,
-    cashOut: parseFloat(r[4]) || 0,
-    net: parseFloat(r[5]) || 0,
-    numBuyInTxns: parseInt(r[6]) || 0,
-    numCashOutTxns: parseInt(r[7]) || 0,
-    match: r[8].trim(),
-    note: r[9]?.trim() ?? "",
+    sessionDate: normalizeDate(r[0]),
+    firstBuyIn: simple ? "" : r[1]?.trim() ?? "",
+    player: r[simple ? 1 : 2]?.trim() ?? "",
+    buyIn, cashOut,
+    net: r[simple ? 4 : 5]?.trim() ? money(r[simple ? 4 : 5]) : cashOut - buyIn,
+    numBuyInTxns: simple ? Number(buyIn > 0) : parseInt(r[6]) || 0,
+    numCashOutTxns: simple ? Number(cashOut > 0) : parseInt(r[7]) || 0,
+    match: simple ? "" : r[8]?.trim() ?? "",
+    note: simple ? "" : r[9]?.trim() ?? "",
   };
 }
 
@@ -68,14 +70,16 @@ function toSessionRow(r: string[]): SessionRow {
 function computePlayerSummaries(sessions: Session[]): PlayerSummary[] {
   const acc: Record<string, {
     venmoBuyIn: number;
+    net: number;
     totalCashOut: number;
     sessions: number;
   }> = {};
 
   for (const sess of sessions) {
     for (const p of sess.players) {
-      if (!acc[p.player]) acc[p.player] = { venmoBuyIn: 0, totalCashOut: 0, sessions: 0 };
+      if (!acc[p.player]) acc[p.player] = { venmoBuyIn: 0, net: 0, totalCashOut: 0, sessions: 0 };
       acc[p.player].venmoBuyIn += p.buyIn;
+      acc[p.player].net += p.net;
       acc[p.player].totalCashOut += p.cashOut;
       acc[p.player].sessions += 1;
     }
@@ -83,7 +87,7 @@ function computePlayerSummaries(sessions: Session[]): PlayerSummary[] {
 
   return Object.entries(acc)
     .map(([player, d]) => {
-      const net = d.totalCashOut - d.venmoBuyIn;
+      const net = d.net;
       const avgNetPerSession = d.sessions > 0 ? net / d.sessions : 0;
       return {
         player,
@@ -129,19 +133,20 @@ function groupSessions(rows: SessionRow[]): Session[] {
 
 // ─── Raw row fetchers ─────────────────────────────────────────────────────────
 
-async function getSessionRowsAsync(): Promise<SessionRow[]> {
-  const rows = USE_SHEETS ? await sheetsSessionRows() : csvSessionRows();
-  return rows.map(toSessionRow);
+async function getSessionRowsAsync(game?: Game): Promise<SessionRow[]> {
+  const selected = game ?? await getSelectedGame();
+  const rows = USE_SHEETS ? await sheetsSessionRows(selected) : csvSessionRows(selected);
+  return rows.map((row) => toSessionRow(row, selected));
 }
 
 // ─── Public: Sessions ─────────────────────────────────────────────────────────
 
-export function getSessions(): Session[] {
-  return groupSessions(csvSessionRows().map(toSessionRow));
+export function getSessions(game: Game = "0.1-0.2"): Session[] {
+  return groupSessions(csvSessionRows(game).map((row) => toSessionRow(row, game)));
 }
 
-export async function getSessionsAsync(): Promise<Session[]> {
-  return groupSessions(await getSessionRowsAsync());
+export async function getSessionsAsync(game?: Game): Promise<Session[]> {
+  return groupSessions(await getSessionRowsAsync(game));
 }
 
 // ─── Public: Player summaries (computed from sessions) ────────────────────────
@@ -206,8 +211,8 @@ function buildHomepageStats(sessions: Session[], summaries: PlayerSummary[]): Ho
   const totalSessions = sessions.length;
   const totalMoneyInPlay = sessions.reduce((sum, s) => sum + s.totalPot, 0);
 
-  let biggestWin = { player: "", amount: -Infinity, date: "" };
-  let biggestLoss = { player: "", amount: Infinity, date: "" };
+  let biggestWin = { player: "", amount: 0, date: "" };
+  let biggestLoss = { player: "", amount: 0, date: "" };
   for (const sess of sessions) {
     for (const p of sess.players) {
       if (p.net > biggestWin.amount) biggestWin = { player: p.player, amount: p.net, date: sess.date };

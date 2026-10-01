@@ -2,7 +2,11 @@ export const dynamic = "force-dynamic";
 import NewSessionForm from "@/components/NewSessionForm";
 import { getSessionsAsync, getPlayerSummariesAsync } from "@/lib/data";
 
+import { getSelectedGame } from "@/lib/selected-game";
+import { GAMES } from "@/lib/games";
+
 export default async function NewSessionPage() {
+  const game = await getSelectedGame();
   const [sessions, summaries] = await Promise.all([
     getSessionsAsync(),
     getPlayerSummariesAsync(),
@@ -18,10 +22,12 @@ export default async function NewSessionPage() {
           New Session
         </h1>
         <p className="text-sm" style={{ color: "var(--muted)" }}>
-          Enter player results. Net is calculated automatically.
+          {GAMES[game].label}: Enter player results. Net is calculated automatically.
         </p>
       </div>
       <NewSessionForm
+        key={game}
+        game={game}
         lastSessionPlayers={lastSessionPlayers}
         allPlayers={allPlayers}
       />

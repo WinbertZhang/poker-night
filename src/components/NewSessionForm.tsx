@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+import type { Game } from "@/lib/games";
+
 interface PlayerRow {
   id: number;
   name: string;
@@ -11,6 +13,7 @@ interface PlayerRow {
 }
 
 interface Props {
+  game: Game;
   lastSessionPlayers: string[];
   allPlayers: string[];
 }
@@ -117,7 +120,7 @@ function NameInput({
   );
 }
 
-export default function NewSessionForm({ lastSessionPlayers, allPlayers }: Props) {
+export default function NewSessionForm({ lastSessionPlayers, allPlayers, game }: Props) {
   const router = useRouter();
   const [date, setDate] = useState(today);
   const [players, setPlayers] = useState<PlayerRow[]>(() =>
@@ -170,7 +173,7 @@ export default function NewSessionForm({ lastSessionPlayers, allPlayers }: Props
       const res = await fetch("/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: JSON.stringify({ game,
           date,
           players: filled.map((p) => ({
             name: p.name.trim(),

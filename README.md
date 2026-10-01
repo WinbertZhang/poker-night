@@ -176,3 +176,28 @@ Then re-run the script and re-paste the output into Sheets.
 
 **Update the Google Sheets link** in the nav:
 In `src/components/Nav.tsx`, search for `https://google.com` and replace with your sheet URL.
+
+## Game selection and buy-ins
+
+Use the game toggle to switch between **$0.10 / $0.20** and **$1 / $1**.
+The selection is remembered across navigation and filters Home, Sessions,
+Buy-ins, Trends, Player Stats, and New Session. `/buyins` lists each player's
+session date, buy-in, cash-out, and net.
+
+The existing game reads the `sessions` tab. The $1 / $1 game reads the
+`1/3 sessions` tab in the same spreadsheet configured by `GOOGLE_SHEET_ID`.
+For the supplied spreadsheet, set that ID to
+`1URCn1xxzoqeYHHerS_Ij_zInNA1nPxmxxN3atjjAh4A`.
+The new tab's columns must be:
+
+```text
+Session Date,Player,Buy-in,Cash-out,Net
+9/30/2026,Allen Mons,$300.00,$337.00,$37.00
+```
+
+Dollar signs and thousands separators are supported (quote CSV amounts
+containing commas). Dates such as `9/30/2026` are normalized for sorting.
+New Session writes to the selected game's tab using its column format.
+
+Without Sheets credentials, the new game uses `data/sessions-1-3.csv` if
+present, otherwise the example row above. CSV files remain locally ignored.

@@ -3,15 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { GAMES, type Game } from "@/lib/games";
+
 const links = [
   { href: "/",             label: "Home",     fullLabel: "Home",        icon: "♠" },
   { href: "/sessions",     label: "Sessions", fullLabel: "All Sessions", icon: "◈" },
   { href: "/trends",       label: "Trends",   fullLabel: "Trends",       icon: "↗" },
+  { href: "/buyins", label: "Buy-ins", fullLabel: "Buy-ins", icon: "$" },
   { href: "/stats",        label: "Stats",    fullLabel: "Player Stats", icon: "⬡" },
   { href: "/new-session",  label: "New",      fullLabel: "New Session",  icon: "+" },
 ];
 
-export default function Nav() {
+export default function Nav({ game }: { game: Game }) {
   const pathname = usePathname();
 
   return (
@@ -27,7 +30,7 @@ export default function Nav() {
           boxShadow: "0 1px 0 rgba(255,255,255,0.04)",
         }}
       >
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center gap-8">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center gap-3">
           <Link
             href="/"
             className="flex items-center gap-2.5 shrink-0"
@@ -55,7 +58,7 @@ export default function Nav() {
                 <Link
                   key={href}
                   href={href}
-                  className="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200"
+                  className="px-2.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200"
                   style={
                     isNew
                       ? {
@@ -81,7 +84,7 @@ export default function Nav() {
 
           {/* Sheets link — pushed to the right */}
           <a
-            href="https://google.com"
+            href={`https://docs.google.com/spreadsheets/d/1URCn1xxzoqeYHHerS_Ij_zInNA1nPxmxxN3atjjAh4A/edit#gid=${GAMES[game].gid}`}
             target="_blank"
             rel="noopener noreferrer"
             className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 shrink-0"
@@ -128,7 +131,7 @@ export default function Nav() {
           </span>
         </Link>
         <a
-          href="https://google.com"
+          href={`https://docs.google.com/spreadsheets/d/1URCn1xxzoqeYHHerS_Ij_zInNA1nPxmxxN3atjjAh4A/edit#gid=${GAMES[game].gid}`}
           target="_blank"
           rel="noopener noreferrer"
           className="ml-auto flex items-center justify-center w-8 h-8 rounded-lg transition-all"
