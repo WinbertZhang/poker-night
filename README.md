@@ -177,12 +177,11 @@ Then re-run the script and re-paste the output into Sheets.
 **Update the Google Sheets link** in the nav:
 In `src/components/Nav.tsx`, search for `https://google.com` and replace with your sheet URL.
 
-## Game selection and buy-ins
+## Game selection
 
 Use the game toggle to switch between **$0.10 / $0.20** and **$1 / $1**.
 The selection is remembered across navigation and filters Home, Sessions,
-Buy-ins, Trends, Player Stats, and New Session. `/buyins` lists each player's
-session date, buy-in, cash-out, and net.
+Trends, Player Stats, and New Session.
 
 The existing game reads the `sessions` tab. The $1 / $1 game reads the
 `1/3 sessions` tab in the same spreadsheet configured by `GOOGLE_SHEET_ID`.

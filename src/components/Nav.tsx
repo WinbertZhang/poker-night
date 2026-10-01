@@ -9,7 +9,6 @@ const links = [
   { href: "/",             label: "Home",     fullLabel: "Home",        icon: "♠" },
   { href: "/sessions",     label: "Sessions", fullLabel: "All Sessions", icon: "◈" },
   { href: "/trends",       label: "Trends",   fullLabel: "Trends",       icon: "↗" },
-  { href: "/buyins", label: "Buy-ins", fullLabel: "Buy-ins", icon: "$" },
   { href: "/stats",        label: "Stats",    fullLabel: "Player Stats", icon: "⬡" },
   { href: "/new-session",  label: "New",      fullLabel: "New Session",  icon: "+" },
 ];
